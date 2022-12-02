@@ -2,9 +2,9 @@ from tkinter import E
 import numpy as np
 
 def init_model():
-    trans_probs = np.zeroes([43,43])
+    trans_probs = np.zeros([43,43])
     
-    emission_probs = np.zeroes([43,4])
+    emission_probs = np.zeros([43,4])
 
     trans_probs[0,0]=0.99666
     trans_probs[0,1]=0.00144
@@ -72,7 +72,7 @@ def init_model():
     emission_probs[0,0]=0.33434
     emission_probs[0,1]=0.15479
     emission_probs[0,2]=0.16613
-    emission_probs[0,3]=0,33474
+    emission_probs[0,3]=0.33474
 
     emission_probs[1,0]=1
     emission_probs[4,2]=1
@@ -146,15 +146,16 @@ def init_model():
     emission_probs[39,1]=1
     emission_probs[42,0]=1
 
-    init_probs = np.zeroes([0,43])
+    init_probs = np.zeros((43))
     init_probs[0]=1.00
 
     return hmm(init_probs, trans_probs, emission_probs)
 
-
+def translate_path_to_indices(path):
+    return list(map(lambda x: int(x), path))
 
 def translate_indices_to_path(indices):
-    mapping = np.zeroes([1,42])
+    mapping = np.empty((42), dtype='object')
     mapping[0]='N'
     mapping[1:21]='C'
     mapping[22:42]='R'
@@ -181,36 +182,6 @@ def make_table(m, n):
     """Make a table with `m` rows and `n` columns filled with zeros."""
     return [[0] * n for _ in range(m)]
 
-
-
-# def compute_w_log(model, x):
-#     k = len(model.init_probs)
-#     trans_probs = model.trans_probs
-#     emission_probs = model.emission_probs
-#     init_probs = np.array(model.init_probs)
-#     n = len(x)
-#     w = make_table(k, n)
-#     w=np.zeros([k,n])
-#     trans_probs=np.array(trans_probs)
-#     emission_probs=np.array(emission_probs)
-#     x = translate_observations_to_indices(x)
-#     for i in range(k):
-#         w[i,0]=init_probs[i]*emission_probs[i, x[0]]
-
-#     for i in range(1,n):
-#         for j in range(k):
-#             prob = w[:,i-1] * trans_probs[:,j]
-#             w[j,i] = max(prob)*emission_probs[j,x[i]]
-            
-            
-#             #maxVal = np.max(w[j,i], emission_probs[x[j], i]*w[j,i-1]*trans_probs[:,j])
-#             #w[j][i]=maxVal
-#             #trans_p = w[:,i-1]+np.log(trans_probs[:,j])
-#            # w[j,i] = max(trans_p)
-#             #w[j,i]=w[j,i]+np.log(emission_probs[j,x[i]])
-#             #w[j][i] = np.maximum(w[j][i] - 1 * trans_probs.T * emission_probs[j, x[i]].T, 1)
-#     return w
-
 def joint_prob_log(model, x, z):
     trans_probs = model.trans_probs
     emission_probs = model.emission_probs
@@ -225,7 +196,7 @@ def opt_path_prob_log(w):
     return np.log(np.amax(last_col))
 
 def backtrack(model, x, w,oldZ):
-    x = np.array(translate_observations_to_indices(x))
+    x = np.array(x)
     trans_probs = np.array(model.trans_probs)
     emission_probs = np.array(model.emission_probs)
     N = w.shape[1]
@@ -245,10 +216,8 @@ def compute_w_log(model, x):
     w=np.zeros([k,n])
     trans_probs=np.array(trans_probs)
     emission_probs=np.array(emission_probs)
-    x = translate_observations_to_indices(x)
     
     z = np.zeros((k, n-1)).astype(np.int32)
-    
     for i in range(k):
         w[i,0]=np.log(init_probs[i])+np.log(emission_probs[i, x[0]])    
     for i in range(1,n):
@@ -319,7 +288,8 @@ def training_by_counting(K, D, x, z):
     counts_transitions, counts_symbol = count_transitions_and_emissions(K,D, x, z)
     prob_matrix_transitions = make_table(K,K)
     prob_matrix_emissions = make_table(K,D)
-    init_probs_7_state = [0.00, 0.00, 0.00, 1.00, 0.00, 0.00, 0.00]
+    init_probs = np.zeros((43))
+    init_probs[0]=1.00
 
     for i in range(len(counts_transitions)):
         for j in range(len(counts_transitions[0])):
@@ -338,7 +308,7 @@ def training_by_counting(K, D, x, z):
         
 
     
-    return hmm(init_probs_7_state, prob_matrix_transitions, prob_matrix_emissions)
+    return hmm(init_probs, prob_matrix_transitions, prob_matrix_emissions)
 
 
 
@@ -356,40 +326,22 @@ def viterbi_update_model(model, x, K, D):
     return new_model
 
 
+def train(model, x, z):
+    x = translate_observations_to_indices(x)
+    z = translate_path_to_indices(x)
+    for i in range(50):
+        model = viterbi_update_model(model, x,z,43,4)
+        print(model.trans_probs)
+    return model
+        
+    
+
 g1 = read_fasta_file('genome1.fa')
 g1_true = read_fasta_file('true-ann1.fa')
 
 x=g1['genome1']
 trueAnnotations=(g1_true['true-ann1'])
-init_probs_7_state = [0.00, 0.00, 0.00, 1.00, 0.00, 0.00, 0.00]
-
-trans_probs_7_state = [
-    [0.00, 0.00, 0.90, 0.10, 0.00, 0.00, 0.00],
-    [1.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
-    [0.00, 1.00, 0.00, 0.00, 0.00, 0.00, 0.00],
-    [0.00, 0.00, 0.05, 0.90, 0.05, 0.00, 0.00],
-    [0.00, 0.00, 0.00, 0.00, 0.00, 1.00, 0.00],
-    [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 1.00],
-    [0.00, 0.00, 0.00, 0.10, 0.90, 0.00, 0.00],
-]
-
-emission_probs_7_state = [
-    #   A     C     G     T
-    [0.30, 0.25, 0.25, 0.20],
-    [0.20, 0.35, 0.15, 0.30],
-    [0.40, 0.15, 0.20, 0.25],
-    [0.25, 0.25, 0.25, 0.25],
-    [0.20, 0.40, 0.30, 0.10],
-    [0.30, 0.20, 0.30, 0.20],
-    [0.15, 0.30, 0.20, 0.35],
-]
-
-hmm_7_state = hmm(init_probs_7_state, trans_probs_7_state, emission_probs_7_state)
-
 myModel = init_model()
-
-
-def 
 
 # Your code to read the annotations and compute the accuracies of your predictions...
 def compute_accuracy(true_ann, pred_ann):
@@ -400,12 +352,11 @@ def compute_accuracy(true_ann, pred_ann):
 
 g1 = read_fasta_file('genome1.fa')
 g1_true = read_fasta_file('true-ann1.fa')
-x=g1['genome1']
-true = g1_true['true-ann1']
-w,z = compute_w_log(hmm_7_state, x)
-z_viterbi = backtrack(hmm_7_state, x, w, z)
+x=g1['genome1'][:100]
+true = g1_true['true-ann1'][:100]
+w,z = compute_w_log(myModel, x)
+z_viterbi = backtrack(myModel, x, w, z)
 print(z_viterbi)
-print(translate_indices_to_path(z_viterbi))
 print("")
 print(true)
 print("acc",compute_accuracy(true,translate_indices_to_path(z_viterbi)))
