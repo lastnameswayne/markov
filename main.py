@@ -30,8 +30,8 @@ def translate_path_to_indices(path):
     return list(map(lambda x: int(x), path))
 
 def translate_annotation_to_hidden_state_7_state(path):
-    pathArr = list(path)
-    path=pathArr
+    path_arr = list(path)
+    path=path_arr
     hidden = np.zeros((len(path)), dtype="int")
     for i in range(len(path)):
         if (path[i]=="N"):
@@ -242,17 +242,17 @@ myModel = init_7_state()
 
 def trainOnAll5FindBestModel():
     #my known genomes
-    g1 = read_fasta_file('genome1.fa').get('genome1')
-    g1_true = read_fasta_file('true-ann1.fa').get('true-ann1')
+    g1 = read_fasta_file('./genomes/genome1.fa').get('genome1')
+    g1_true = read_fasta_file('./true/true-ann1.fa').get('true-ann1')
 
-    g2 = read_fasta_file('genome2.fa').get('genome2')
-    g2_true = read_fasta_file('true-ann2.fa').get('true-ann2')
-    g3 = read_fasta_file('genome3.fa').get('genome3')
-    g3_true = read_fasta_file('true-ann3.fa').get('true-ann3')
-    g4 = read_fasta_file('genome4.fa').get('genome4')
-    g4_true = read_fasta_file('true-ann4.fa').get('true-ann4')
-    g5 = read_fasta_file('genome5.fa').get('genome5')
-    g5_true = read_fasta_file('true-ann5.fa').get('true-ann5')
+    g2 = read_fasta_file('./genomes/genome2.fa').get('genome2')
+    g2_true = read_fasta_file('./true/true-ann2.fa').get('true-ann2')
+    g3 = read_fasta_file('./genomes/genome3.fa').get('genome3')
+    g3_true = read_fasta_file('./true/true-ann3.fa').get('true-ann3')
+    g4 = read_fasta_file('./genomes/genome4.fa').get('genome4')
+    g4_true = read_fasta_file('./true/true-ann4.fa').get('true-ann4')
+    g5 = read_fasta_file('./genomes/genome5.fa').get('genome5')
+    g5_true = read_fasta_file('./true/true-ann5.fa').get('true-ann5')
     
     x_1=translate_observations_to_indices(g1)
     x_2=translate_observations_to_indices(g2)
@@ -266,76 +266,76 @@ def trainOnAll5FindBestModel():
     z_5=translate_annotation_to_hidden_state_7_state(g5_true)
     
     print("starting training")
-    myTrainedModel1 = train_to_convergence(myModel, x_1, z_1)
-    myTrainedModel2 = train_to_convergence(myTrainedModel1, x_2, z_2)
-    myTrainedModel3 = train_to_convergence(myTrainedModel2, x_3, z_3)
-    myTrainedModel4 = train_to_convergence(myTrainedModel3, x_4, z_4)
-    myTrainedModel5 = train_to_convergence(myTrainedModel4, x_5, z_5)
+    my_trained_model1 = train_to_convergence(myModel, x_1, z_1)
+    my_trained_model2 = train_to_convergence(my_trained_model1, x_2, z_2)
+    my_trained_model3 = train_to_convergence(my_trained_model2, x_3, z_3)
+    my_trained_model4 = train_to_convergence(my_trained_model3, x_4, z_4)
+    my_trained_model5 = train_to_convergence(my_trained_model4, x_5, z_5)
 
     print("DONE WITH TRAINING")
 
     #unknown genes
-    g6 = read_fasta_file('genome6.fa')['genome6']
-    g7 = read_fasta_file('genome7.fa')['genome7']
-    g8 = read_fasta_file('genome8.fa')['genome8']
-    g9 = read_fasta_file('genome9.fa')['genome9']
-    g10 = read_fasta_file('genome10.fa')['genome10']
+    g6 = read_fasta_file('./genomes/genome6.fa')['genome6']
+    g7 = read_fasta_file('./genomes/genome7.fa')['genome7']
+    g8 = read_fasta_file('./genomes/genome8.fa')['genome8']
+    g9 = read_fasta_file('./genomes/genome9.fa')['genome9']
+    g10 = read_fasta_file('./genomes/genome10.fa')['genome10']
     
     x_6=translate_observations_to_indices(g6)
-    w_6,z_6 = compute_w_log(myTrainedModel5, x_6)
-    z_viterbi_6 = backtrack(myTrainedModel5, x_6, w_6, z_6)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_6))
-    with open('predict6.fa', 'w') as fp:
-        fp.write(finalS)
+    w_6,z_6 = compute_w_log(my_trained_model5, x_6)
+    z_viterbi_6 = backtrack(my_trained_model5, x_6, w_6, z_6)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_6))
+    with open('./predictions/predict6.fa', 'w') as fp:
+        fp.write(final_s)
 
     x_7=translate_observations_to_indices(g7)
-    w_7,z_7 = compute_w_log(myTrainedModel5, x_7)
-    z_viterbi_7 = backtrack(myTrainedModel5, x_7, w_7, z_7)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_7))
-    with open('predict7.fa', 'w') as fp:
-        fp.write(finalS)
+    w_7,z_7 = compute_w_log(my_trained_model5, x_7)
+    z_viterbi_7 = backtrack(my_trained_model5, x_7, w_7, z_7)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_7))
+    with open('./predictions/predict7.fa', 'w') as fp:
+        fp.write(final_s)
 
     x_8=translate_observations_to_indices(g8)
-    w_8,z_8 = compute_w_log(myTrainedModel5, x_8)
-    z_viterbi_8 = backtrack(myTrainedModel5, x_8, w_8, z_8)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_8))
-    with open('predict8.fa', 'w') as fp:
-        fp.write(finalS)
+    w_8,z_8 = compute_w_log(my_trained_model5, x_8)
+    z_viterbi_8 = backtrack(my_trained_model5, x_8, w_8, z_8)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_8))
+    with open('./predictions/predict8.fa', 'w') as fp:
+        fp.write(final_s)
 
 
     x_9=translate_observations_to_indices(g9)
-    w_9,z_9 = compute_w_log(myTrainedModel5, x_9)
-    z_viterbi_9 = backtrack(myTrainedModel5, x_9, w_9, z_9)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_9))
-    with open('predict9.fa', 'w') as fp:
-        fp.write(finalS)
+    w_9,z_9 = compute_w_log(my_trained_model5, x_9)
+    z_viterbi_9 = backtrack(my_trained_model5, x_9, w_9, z_9)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_9))
+    with open('./predictions/predict9.fa', 'w') as fp:
+        fp.write(final_s)
 
     x_10=translate_observations_to_indices(g10)
-    w_10,z_10 = compute_w_log(myTrainedModel5, x_10)
-    z_viterbi_10 = backtrack(myTrainedModel5, x_10, w_10, z_10)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_10))
-    with open('predict10.fa', 'w') as fp:
-        fp.write(finalS)
+    w_10,z_10 = compute_w_log(my_trained_model5, x_10)
+    z_viterbi_10 = backtrack(my_trained_model5, x_10, w_10, z_10)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_10))
+    with open('./predictions/predict10.fa', 'w') as fp:
+        fp.write(final_s)
 
     print("DONE WITH PREDICTING")
 
 
 def FiveFoldCrossValidation():
     #train on 1,2,3,4 , predict on 5
-    g1 = read_fasta_file('genome1.fa')['genome1']
-    g1_true = read_fasta_file('true-ann1.fa')['true-ann1']
+    g1 = read_fasta_file('./genomes/genome1.fa')['genome1']
+    g1_true = read_fasta_file('./true/true-ann1.fa')['true-ann1']
 
-    g2 = read_fasta_file('genome2.fa')['genome2']
-    g2_true = read_fasta_file('true-ann2.fa')['true-ann2']
+    g2 = read_fasta_file('./genomes/genome2.fa')['genome2']
+    g2_true = read_fasta_file('./true/true-ann2.fa')['true-ann2']
 
-    g3 = read_fasta_file('genome3.fa')['genome3']
-    g3_true = read_fasta_file('true-ann3.fa')['true-ann3']
+    g3 = read_fasta_file('./genomes/genome3.fa')['genome3']
+    g3_true = read_fasta_file('./true/true-ann3.fa')['true-ann3']
 
-    g4 = read_fasta_file('genome4.fa')['genome4']
-    g4_true = read_fasta_file('true-ann4.fa')['true-ann4']
+    g4 = read_fasta_file('./genomes/genome4.fa')['genome4']
+    g4_true = read_fasta_file('./true/true-ann4.fa')['true-ann4']
 
-    g5 = read_fasta_file('genome5.fa')['genome5']
-    g5_true = read_fasta_file('true-ann5.fa')['true-ann5']
+    g5 = read_fasta_file('./genomes/genome5.fa')['genome5']
+    g5_true = read_fasta_file('./true/true-ann5.fa')['true-ann5']
     
     x_1=translate_observations_to_indices(g1)
     x_2=translate_observations_to_indices(g2)
@@ -356,9 +356,9 @@ def FiveFoldCrossValidation():
     #ROUND 1, predict on 1
     w_1,z_w_log_1 = compute_w_log(myTrainedModel5, x_1)
     z_viterbi_1 = backtrack(myTrainedModel5, x_1, w_1, z_w_log_1)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_1))
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_1))
     with open('predict1.fa', 'w') as fp:
-        fp.write(finalS)
+        fp.write(final_s)
 
     print("DONE WITH ROUND 1")
 
@@ -371,9 +371,9 @@ def FiveFoldCrossValidation():
     #ROUND 2, predict on 2
     w_2,z_w_log_2 = compute_w_log(myTrainedModel5, x_2)
     z_viterbi_2 = backtrack(myTrainedModel5, x_2, w_2, z_w_log_2)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_2))
-    with open('predict2.fa', 'w') as fp:
-        fp.write(finalS)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_2))
+    with open('./predictions/predict2.fa', 'w') as fp:
+        fp.write(final_s)
 
     print("DONE WITH ROUND 2")
 
@@ -385,9 +385,9 @@ def FiveFoldCrossValidation():
     #ROUND 3, predict on 3
     w_3,z_w_log_3 = compute_w_log(myTrainedModel5, x_3)
     z_viterbi_3 = backtrack(myTrainedModel5, x_3, w_3, z_w_log_3)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_3))
-    with open('predict3.fa', 'w') as fp:
-        fp.write(finalS)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_3))
+    with open('./predictions/predict3.fa', 'w') as fp:
+        fp.write(final_s)
     print("DONE WITH ROUND 3")
 
 
@@ -399,9 +399,9 @@ def FiveFoldCrossValidation():
     #ROUND 4, predict on 4
     w_4,z_w_log_4 = compute_w_log(myTrainedModel5, x_4)
     z_viterbi_4 = backtrack(myTrainedModel5, x_4, w_4, z_w_log_4)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_4))
-    with open('predict4.fa', 'w') as fp:
-        fp.write(finalS)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_4))
+    with open('./predictions/predict4.fa', 'w') as fp:
+        fp.write(final_s)
     print("DONE WITH ROUND 4")
 
     #ROUND 5, train on 1,2,3,4
@@ -412,9 +412,9 @@ def FiveFoldCrossValidation():
     #ROUND 5, predict on 5
     w_5,z_w_log_5 = compute_w_log(myTrainedModel4, x_5)
     z_viterbi_5 = backtrack(myTrainedModel4, x_5, w_5, z_w_log_5)
-    finalS = ''.join(translate_indices_to_path_7_state(z_viterbi_5))
-    with open('predict5.fa', 'w') as fp:
-        fp.write(finalS)
+    final_s = ''.join(translate_indices_to_path_7_state(z_viterbi_5))
+    with open('./predictions/predict5.fa', 'w') as fp:
+        fp.write(final_s)
 
 print("Starting to find best model and predicting genome 6 through 10")
 trainOnAll5FindBestModel()
